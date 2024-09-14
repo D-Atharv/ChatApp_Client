@@ -18,7 +18,7 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="bg-white border border-gray-200 dark:bg-gray-900  mx-2 my-2 rounded-xl">
+        <nav className="bg-gray-900 border border-gray-200 dark:bg-gray-900  mx-2 my-2 rounded-xl">
             <div className="relative max-w-screen flex items-center justify-between  p-4 px-10">
                 <a href="#" className="flex items-center space-x-3">
                     <Image src={eye} width={70} height={70} alt="Eye logo" className="h-8" />

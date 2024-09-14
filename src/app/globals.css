@@ -28,6 +28,31 @@ body {
 html,
 body {
   overflow: hidden; /* Prevents scrolling on the entire page */
-  height: 100%; /* Ensures that the body takes up the full height of the viewport */
+  /* height: 100%; Ensures that the body takes up the full height of the viewport */
   margin: 0; /* Removes default margin */
+}
+
+.custom-scrollbar {
+  scrollbar-width: none; /* Hide scrollbar by default for Firefox */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0; /* Hide scrollbar by default for WebKit browsers */
+}
+
+.custom-scrollbar:hover {
+  scrollbar-width: thin; /* Show thin scrollbar on hover for Firefox */
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar {
+  width: 8px; /* Show scrollbar on hover for WebKit browsers */
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: white; /* Custom scrollbar color on hover */
+  border-radius: 10px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-track {
+  background-color: #333333; /* Custom track color on hover */
 }
