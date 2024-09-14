@@ -25,3 +25,9 @@ body {
     text-wrap: balance;
   }
 }
+html,
+body {
+  overflow: hidden; /* Prevents scrolling on the entire page */
+  height: 100%; /* Ensures that the body takes up the full height of the viewport */
+  margin: 0; /* Removes default margin */
+}
