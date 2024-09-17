@@ -45,7 +45,7 @@ export default function ProfileCards() {
         <div
             ref={containerRef}
             // className="w-full p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto custom-scrollbar"
-            className="w-full sm:w-1/2 md:w-1/3 lg:w-1/3  p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto custom-scrollbar"
+            className="w-full sm:w-1/2 md:w-[40%] lg:w-1/3  p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto custom-scrollbar"
             style={{ maxHeight: 'calc(100vh - 80px)' }}
         >
             <div className="flex items-center justify-between mb-4">

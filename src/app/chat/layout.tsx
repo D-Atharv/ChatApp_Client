@@ -11,7 +11,7 @@ export default function ChatHome() {
                     <ProfileCards />
                     {/* Hide ChatBox until lg, then show it */}
                     {/* <div className="hidden md:flex lg:flex-1 ml-6"> */}
-                    <div className="hidden sm:flex md:flex-auto lg:flex-1 ml-6">
+                    <div className="hidden sm:flex sm:flex-auto md:flex-1 lg:flex-1 ml-6">
                         <ChatBox />
                     </div>
                 </div>
