@@ -1,30 +1,48 @@
 'use client'
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import favicon from '../../../../styles/svg/favicon.ico';
 import '../../globals.css';
+import { group } from 'console';
 
-export default function ProfileCards() {
+type ProfileCardProps = {
+    onSelectUser : (user: string) => void;
+    currentUserID : string;
+}
+
+type Group = {
+    id: string,
+    title?: string,
+    isGroupChat: boolean,
+    users: {
+        userId: string,
+        name: string,
+    }[],
+}
+
+export default function ProfileCards({onSelectUser, currentUserID}: ProfileCardProps) {
     const containerRef = useRef<HTMLDivElement>(null);
+    const [groups,setGroups] = useState<Group[]>([]);
 
-    const customers = [
-        { name: "Neil Sims", email: "email@windster.com", amount: "$320", imgSrc: favicon },
-        { name: "Bonnie Green", email: "email@windster.com", amount: "$3467", imgSrc: favicon },
-        { name: "Michael Gough", email: "email@windster.com", amount: "$67", imgSrc: favicon },
-        { name: "Lana Byrd", email: "email@windster.com", amount: "$367", imgSrc: favicon },
-        { name: "Thomas Lean", email: "email@windster.com", amount: "$2367", imgSrc: favicon },
-        { name: "Neil Sims", email: "email@windster.com", amount: "$320", imgSrc: favicon },
-        { name: "Bonnie Green", email: "email@windster.com", amount: "$3467", imgSrc: favicon },
-        { name: "Michael Gough", email: "email@windster.com", amount: "$67", imgSrc: favicon },
-        { name: "Lana Byrd", email: "email@windster.com", amount: "$367", imgSrc: favicon },
-        { name: "Thomas Lean", email: "email@windster.com", amount: "$2367", imgSrc: favicon },
-        { name: "Neil Sims", email: "email@windster.com", amount: "$320", imgSrc: favicon },
-        { name: "Bonnie Green", email: "email@windster.com", amount: "$3467", imgSrc: favicon },
-        { name: "Michael Gough", email: "email@windster.com", amount: "$67", imgSrc: favicon },
-        { name: "Lana Byrd", email: "email@windster.com", amount: "$367", imgSrc: favicon },
-        { name: "Thomas Lean", email: "email@windster.com", amount: "$2367", imgSrc: favicon },
-    ];
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try{
+                const response = await fetch('http://localhost:3000/api/group/allGroups');
+                if(!response.ok){
+                    throw new Error("Network response was not ok");
+                }
+                const data = await response.json();
+                console.log(data.data);
+                setGroups(data.data);
+            }catch(error){
+                console.error("Failed to fetch Groups",error);
+            }
+        }
+
+        fetchGroups();
+
+    },[]);
 
     useEffect(() => {
         const updateContainerHeight = () => {
@@ -41,11 +59,24 @@ export default function ProfileCards() {
         return () => window.removeEventListener('resize', updateContainerHeight);
     }, []);
 
+
+    const getGroupTitle = (group: Group): string => {
+        if (group.isGroupChat) {
+            return group.title || 'Group Chat';
+        } else {
+            const otherUser = group.users.find(user => user.userId !== currentUserID);
+            return otherUser ? otherUser.name : 'Unknown User';
+        }
+    };
+
+    const handleSelectGroup = (group : Group) => {
+        onSelectUser(group.id);
+    }
+
     return (
         <div
             ref={containerRef}
-            // className="w-full p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto custom-scrollbar"
-            className="w-full sm:w-1/2 md:w-[40%] lg:w-1/3  p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto custom-scrollbar"
+            className="w-full h-screen sm:w-[100%] md:w-[40%] lg:w-1/3 p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto scrollbar-hide"
             style={{ maxHeight: 'calc(100vh - 80px)' }}
         >
             <div className="flex items-center justify-between mb-4">
@@ -56,28 +87,25 @@ export default function ProfileCards() {
             </div>
             <div className="flow-root">
                 <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {customers.map((customer, index) => (
-                        <li key={index} className="py-4 ">
+                    {groups.map((group, index) => (
+                        <li key={index} className="py-4" onClick={() => handleSelectGroup(group)}>
                             <div className="flex items-center">
                                 <div className="flex-shrink-0">
                                     <Image
-                                        className="w-8 h-8 rounded-full"
-                                        src={customer.imgSrc}
-                                        alt={`${customer.name} image`}
+                                        className="w-8 h-8 rounded-full cursor-pointer"
+                                        src={favicon}
+                                        alt="Group image"
                                         width={32}
                                         height={32}
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0 ms-4">
+                                    <p className="text-lg font-semibold text-gray-200 truncate dark:text-white cursor-pointer">
+                                        {getGroupTitle(group)}
+                                    </p>
                                     <p className="text-sm font-medium text-gray-200 truncate dark:text-white">
-                                        {customer.name}
+                                        Users: {group.users.map(u => u.name).join(', ')}
                                     </p>
-                                    <p className="text-sm text-gray-400 truncate dark:text-gray-400">
-                                        {customer.email}
-                                    </p>
-                                </div>
-                                <div className="inline-flex items-center text-base font-semibold text-gray-400 dark:text-white">
-                                    {customer.amount}
                                 </div>
                             </div>
                         </li>
@@ -87,3 +115,5 @@ export default function ProfileCards() {
         </div>
     );
 }
+
+
