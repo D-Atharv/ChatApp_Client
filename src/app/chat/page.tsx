@@ -36,16 +36,12 @@ export default function ChatHome() {
             <Navbar />
             <div className="py-4 px-4 sm:px-6 lg:px-8 overflow-hidden">
                 <div className="flex justify-between">
-                    <ProfileCards onSelectUser={handleSelectedUser} />
+                    <ProfileCards />
 
                     <div className="hidden sm:flex sm:flex-auto md:flex-1 lg:flex-1 ml-6">
-                        {selectedUser ? (
-                            <ChatBox selectedUser={selectedUser} />
-                        ) : (
-                            <div className="text-gray-400 text-center p-8">
-                                <p>Select a conversation to start chatting.</p>
-                            </div>
-                        )}
+                            <ChatBox  />
+                         
+                        
                     </div>
                 </div>
             </div>

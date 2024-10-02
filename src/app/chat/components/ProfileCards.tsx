@@ -4,45 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import favicon from '../../../../styles/svg/favicon.ico';
 import '../../globals.css';
-import { group } from 'console';
 
-type ProfileCardProps = {
-    onSelectUser : (user: string) => void;
-    currentUserID : string;
-}
 
-type Group = {
-    id: string,
-    title?: string,
-    isGroupChat: boolean,
-    users: {
-        userId: string,
-        name: string,
-    }[],
-}
+interface Group {
+    users: { name: string }[];
+    // Add other properties of the group object here
+  }
 
-export default function ProfileCards({onSelectUser, currentUserID}: ProfileCardProps) {
+export default function ProfileCards() {
+const [groups, setGroups] = useState<Group[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [groups,setGroups] = useState<Group[]>([]);
-
-    useEffect(() => {
-        const fetchGroups = async () => {
-            try{
-                const response = await fetch('http://localhost:3000/api/group/allGroups');
-                if(!response.ok){
-                    throw new Error("Network response was not ok");
-                }
-                const data = await response.json();
-                console.log(data.data);
-                setGroups(data.data);
-            }catch(error){
-                console.error("Failed to fetch Groups",error);
-            }
-        }
-
-        fetchGroups();
-
-    },[]);
 
     useEffect(() => {
         const updateContainerHeight = () => {
@@ -59,19 +30,15 @@ export default function ProfileCards({onSelectUser, currentUserID}: ProfileCardP
         return () => window.removeEventListener('resize', updateContainerHeight);
     }, []);
 
+    const handleSelectGroup = (group: any) => {
+        // Add your logic here to handle the selected group
+        console.log('Selected group:', group);
+      };
 
-    const getGroupTitle = (group: Group): string => {
-        if (group.isGroupChat) {
-            return group.title || 'Group Chat';
-        } else {
-            const otherUser = group.users.find(user => user.userId !== currentUserID);
-            return otherUser ? otherUser.name : 'Unknown User';
-        }
-    };
-
-    const handleSelectGroup = (group : Group) => {
-        onSelectUser(group.id);
-    }
+      const getGroupTitle = (group: any) => {
+        // Return the title of the group
+        return group.name || 'Untitled Group';
+      };
 
     return (
         <div
