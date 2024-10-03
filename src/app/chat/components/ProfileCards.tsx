@@ -1,20 +1,55 @@
-'use client'
+'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import favicon from '../../../../styles/svg/favicon.ico';
 import '../../globals.css';
 
+interface User {
+    userId: string;
+    name: string;
+    image: string | null;
+}
 
 interface Group {
-    users: { name: string }[];
-    // Add other properties of the group object here
-  }
+    id: string;
+    isGroupChat: boolean;
+    users: User[];
+}
 
 export default function ProfileCards() {
-const [groups, setGroups] = useState<Group[]>([]);
+    const [groups, setGroups] = useState<Group[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                const response = await fetch('/api/group/allGroups', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const data = await response.json();
+                if (response.ok && data.response === 'success') {
+                    setGroups(data.data); // Assuming data.data contains an array of groups
+                } else {
+                    throw new Error(data.message || 'Failed to retrieve groups');
+                }
+            } catch (error: any) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGroups();
+    }, []);
+
+    // Adjust container height on window resize
     useEffect(() => {
         const updateContainerHeight = () => {
             if (containerRef.current) {
@@ -30,20 +65,29 @@ const [groups, setGroups] = useState<Group[]>([]);
         return () => window.removeEventListener('resize', updateContainerHeight);
     }, []);
 
-    const handleSelectGroup = (group: any) => {
-        // Add your logic here to handle the selected group
+    const handleSelectGroup = (group: Group) => {
         console.log('Selected group:', group);
-      };
+    };
 
-      const getGroupTitle = (group: any) => {
-        // Return the title of the group
-        return group.name || 'Untitled Group';
-      };
+    const getGroupTitle = (group: Group) => {
+        if (group.isGroupChat) {
+            return 'Group Chat'; // Placeholder, adjust based on your needs
+        }
+        return group.users.length > 0 ? group.users[0].name : 'Untitled Group';
+    };
+
+    if (loading) {
+        return <p className="text-white">Loading groups...</p>;
+    }
+
+    if (error) {
+        return <p className="text-red-500">{error}</p>;
+    }
 
     return (
         <div
             ref={containerRef}
-            className="w-full h-screen sm:w-[100%] md:w-[40%] lg:w-1/3 p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto scrollbar-hide"
+            className="w-full h-screen between_custom:w-[35%] sm:w-[100%] md:w-[40%] lg:w-1/3 p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto scrollbar-hide"
             style={{ maxHeight: 'calc(100vh - 80px)' }}
         >
             <div className="flex items-center justify-between mb-4">
@@ -54,8 +98,8 @@ const [groups, setGroups] = useState<Group[]>([]);
             </div>
             <div className="flow-root">
                 <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {groups.map((group, index) => (
-                        <li key={index} className="py-4" onClick={() => handleSelectGroup(group)}>
+                    {groups.map((group) => (
+                        <li key={group.id} className="py-4" onClick={() => handleSelectGroup(group)}>
                             <div className="flex items-center">
                                 <div className="flex-shrink-0">
                                     <Image
@@ -71,7 +115,7 @@ const [groups, setGroups] = useState<Group[]>([]);
                                         {getGroupTitle(group)}
                                     </p>
                                     <p className="text-sm font-medium text-gray-200 truncate dark:text-white">
-                                        Users: {group.users.map(u => u.name).join(', ')}
+                                        Users: {group.users.map((u) => u.name).join(', ')}
                                     </p>
                                 </div>
                             </div>
@@ -82,5 +126,8 @@ const [groups, setGroups] = useState<Group[]>([]);
         </div>
     );
 }
+
+
+
 
 

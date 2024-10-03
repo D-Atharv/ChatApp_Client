@@ -1,36 +1,26 @@
 'use client';
 import { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation'; // For redirecting
-import { useAuthContext } from '@/context/AuthContext'; // Use auth context
+import { useRouter } from 'next/navigation'; 
+import { useAuthContext } from '@/context/AuthContext'; 
 import ChatBox from "./components/ChatBox";
 import Navbar from "./components/Navbar";
 import ProfileCards from "./components/ProfileCards";
 
-// This must be the default export in your page file
 export default function ChatHome() {
-    const [selectedUser, setSelectedUser] = useState<string | null>(null);
     
-    const { authUser } = useAuthContext(); // Get the current authenticated user
-    const router = useRouter(); // Use router to redirect if not authenticated
+    const { authUser } = useAuthContext(); 
+    const router = useRouter(); 
 
-    // Check if user is authenticated
     useEffect(() => {
         if (!authUser) {
-            router.push('/login'); // Redirect to login if not authenticated
+            router.push('/login');
         }
     }, [authUser, router]);
 
-    // If user is not authenticated, do not render the component
     if (!authUser) {
-        return null;
+        return <h1>Not authenticated</h1>;
     }
 
-    // Function to handle selecting a user
-    const handleSelectedUser = (user: string) => {
-        setSelectedUser(user);
-    }
-
-    // Render the chat page when user is authenticated
     return (
         <div className="min-h-screen bg-black flex flex-col ">
             <Navbar />
@@ -40,8 +30,6 @@ export default function ChatHome() {
 
                     <div className="hidden sm:flex sm:flex-auto md:flex-1 lg:flex-1 ml-6">
                             <ChatBox  />
-                         
-                        
                     </div>
                 </div>
             </div>

@@ -5,7 +5,7 @@ export const useLogin = () => {
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await fetch("http://localhost:3000/api/user/login", {
+            const response = await fetch("/api/user/login", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -13,7 +13,6 @@ export const useLogin = () => {
                 body: JSON.stringify({ email, password }),
             });
             const data = await response.json();
-            console.log(data);
 
             if (!response.ok) {
                 throw new Error(data.error || 'login failed');

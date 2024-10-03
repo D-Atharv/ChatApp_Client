@@ -7,7 +7,7 @@ export const useSignIn = () => {
     const signIn = async (name: string, email: string, password: string) => {
 
         try {
-            const response = await fetch('http://localhost:3000/api/user/signin', {
+            const response = await fetch('/api/user/signin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
