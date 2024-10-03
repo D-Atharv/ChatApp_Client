@@ -7,7 +7,7 @@ import dp from '../../../../styles/svg/eye-solid.svg';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLogOut } from '@/hooks/auth/useLogout';
 
-export default function Navbar() {
+export const Navbar = () => {
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
     const { authUser } = useAuthContext();
     const logout = useLogOut();
@@ -24,7 +24,6 @@ export default function Navbar() {
                     <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Iris</span>
                 </a>
                 <div className="flex items-center space-x-3 relative">
-                    {/* User Profile Button */}
                     <button
                         type="button"
                         className="flex text-sm rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
@@ -46,7 +45,6 @@ export default function Navbar() {
                         )}
                     </button>
 
-                    {/* Dropdown Menu */}
                     {dropdownOpen && (
                         <div className="absolute right-0 top-full mt-2 w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 z-50">
                             <div className="px-4 py-3">

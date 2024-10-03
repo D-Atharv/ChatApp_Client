@@ -17,7 +17,11 @@ interface Group {
     users: User[];
 }
 
-export default function ProfileCards() {
+interface ProfileCardsProps {
+    onSelectGroup: (groupId: string, groupName: string) => void; // Pass both groupId and groupName
+}
+
+export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps)  =>{
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -26,13 +30,7 @@ export default function ProfileCards() {
     useEffect(() => {
         const fetchGroups = async () => {
             try {
-                const response = await fetch('/api/group/allGroups', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
+                const response = await fetch('/api/group/allGroups');
                 const data = await response.json();
                 if (response.ok && data.response === 'success') {
                     setGroups(data.data); // Assuming data.data contains an array of groups
@@ -66,14 +64,9 @@ export default function ProfileCards() {
     }, []);
 
     const handleSelectGroup = (group: Group) => {
-        console.log('Selected group:', group);
-    };
-
-    const getGroupTitle = (group: Group) => {
-        if (group.isGroupChat) {
-            return 'Group Chat'; // Placeholder, adjust based on your needs
-        }
-        return group.users.length > 0 ? group.users[0].name : 'Untitled Group';
+        const groupName = group.isGroupChat ? 'Group Chat' : group.users[0].name;
+        // Pass both groupId and groupName to the parent component
+        onSelectGroup(group.id, groupName);
     };
 
     if (loading) {
@@ -83,6 +76,7 @@ export default function ProfileCards() {
     if (error) {
         return <p className="text-red-500">{error}</p>;
     }
+
 
     return (
         <div
@@ -112,7 +106,7 @@ export default function ProfileCards() {
                                 </div>
                                 <div className="flex-1 min-w-0 ms-4">
                                     <p className="text-lg font-semibold text-gray-200 truncate dark:text-white cursor-pointer">
-                                        {getGroupTitle(group)}
+                                        {group.isGroupChat ? 'Group Chat' : group.users[0].name}
                                     </p>
                                     <p className="text-sm font-medium text-gray-200 truncate dark:text-white">
                                         Users: {group.users.map((u) => u.name).join(', ')}
