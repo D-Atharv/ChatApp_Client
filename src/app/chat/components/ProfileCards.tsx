@@ -21,7 +21,7 @@ interface ProfileCardsProps {
     onSelectGroup: (groupId: string, groupName: string) => void; // Pass both groupId and groupName
 }
 
-export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps)  =>{
+export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -120,8 +120,4 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps)  =>{
         </div>
     );
 }
-
-
-
-
 

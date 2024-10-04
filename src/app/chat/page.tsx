@@ -38,7 +38,7 @@ export default function ChatHome() {
 
                         ) : (
                             <div className="flex justify-center items-center flex-1 relative bg-gray-700 rounded-xl">
-                                <p className="text-gray-200 font-bold text-[2em] text-lg">Welcome {authUser.name}</p>
+                                <p className="text-gray-200 font-bold text-[2.2em] ">Welcome {authUser.name}</p>
                             </div>
                         )}
                     </div>
