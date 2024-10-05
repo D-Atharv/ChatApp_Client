@@ -47,7 +47,6 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
         fetchGroups();
     }, []);
 
-    // Adjust container height on window resize
     useEffect(() => {
         const updateContainerHeight = () => {
             if (containerRef.current) {

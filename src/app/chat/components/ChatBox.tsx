@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
+import { io } from 'socket.io-client';
 import eye from '../../../../styles/svg/eye-solid.svg';
 import { useAuthContext } from '@/context/AuthContext';
 
@@ -22,10 +23,12 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [optimisticMessageIds, setOptimisticMessageIds] = useState<string[]>([]); // Track optimistic messages
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { authUser } = useAuthContext();
+
+  const socket = useRef<any>(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -43,17 +46,45 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName }) => {
         console.error('Error fetching messages:', error);
       } finally {
         setLoading(false);
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 0); // Ensure this runs after messages are rendered
       }
     };
 
     fetchMessages();
   }, [groupId]);
 
+  useEffect(() => {
+    if (!socket.current) {
+      socket.current = io('http://localhost:3000' as string); 
+
+      socket.current.emit('join_group', groupId);
+
+      socket.current.on('receive_message', (message: Message) => {
+        // Ignore messages that were added optimistically (already in the list)
+        if (!optimisticMessageIds.includes(message.id)) {
+          setMessages((prevMessages) => [...prevMessages, message]);
+          setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }, 0);
+        }
+      });
+    }
+
+    return () => {
+      if (socket.current) {
+        socket.current.disconnect();
+        socket.current = null;
+      }
+    };
+  }, [groupId, optimisticMessageIds]); // Add optimisticMessageIds to dependencies
+
   const handleSendMessage = async () => {
-    if (newMessage.trim() === '') return; 
+    if (newMessage.trim() === '') return;
 
     const newMessageObj: Message = {
-      id: crypto.randomUUID(), 
+      id: crypto.randomUUID(),
       content: newMessage,
       senderId: authUser.id,
       groupId,
@@ -62,61 +93,42 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName }) => {
 
     // Optimistically add the new message to the messages list
     setMessages((prevMessages) => [...prevMessages, newMessageObj]);
-    setNewMessage(''); 
+
+    // Track the optimistic message so it can be filtered later
+    setOptimisticMessageIds((prevIds) => [...prevIds, newMessageObj.id]);
+
+    setNewMessage('');
 
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
 
-    try {
-      const response = await fetch(`/api/message/groups/${groupId}/sendMessage`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: newMessageObj.content,
-        }),
-      });
+    socket.current.emit('send_message', {
+      content: newMessageObj.content,
+      groupId,
+      senderId: authUser.id,
+    });
 
-      if (!response.ok) {
-        throw new Error('Failed to send the message');
-      }
-
-      const data = await response.json();
-      console.log('Message sent:', data);
-
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.id === newMessageObj.id
-            ? { ...msg, id: data.data.message.id, createdAt: data.data.message.createdAt }
-            : msg
-        )
-      );
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-
-    // Scroll to the bottom of the messages after sending
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 0);
   };
 
-  // Automatically scroll to the bottom when new messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages]); 
 
   return (
     <div className="flex-1 relative bg-gray-700 rounded-xl">
       <header className="bg-gray-900 p-4 text-gray-400 rounded-xl rounded-b-none">
         <div className="w-full h-12 rounded-full overflow-hidden flex justify-start items-center">
-        <h1 className='pr-5 text-[1.4em] font-bold'>Back</h1>   
+          <h1 className='pr-5 text-[1.4em] font-bold'>Back</h1>
           <Image src={eye} alt="User Avatar" width={48} height={48} className="object-cover" />
-          <h1 className="text-2xl ml-4 font-semibold">{groupName}</h1> 
+          <h1 className="text-2xl ml-4 font-semibold">{groupName}</h1>
         </div>
       </header>
 
-      <div ref={messagesContainerRef} className="overflow-y-auto p-4 h-[calc(100vh-20rem)] scrollbar-hide">
+      <div className="overflow-y-auto p-4 h-[calc(100vh-20rem)] scrollbar-hide">
         {loading ? (
           <p className="text-gray-400">Loading messages...</p>
         ) : (

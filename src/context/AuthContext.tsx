@@ -1,18 +1,17 @@
-'use client'
+'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AuthContextType {
     authUser: any;
     setAuthUser: React.Dispatch<React.SetStateAction<any>>;
+    isLoading: boolean; 
 }
 
-const AuthContext = createContext<AuthContextType | undefined>({
-    authUser: null,
-	setAuthUser: () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [authUser, setAuthUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true); 
 
     useEffect(() => {
         const fetchAuthUser = async () => {
@@ -20,22 +19,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 const response = await fetch('/api/user/me');
                 const data = await response.json();
 
-                console.log(data);
                 if (!response.ok) {
                     throw new Error(data.error);
                 }
-                setAuthUser(data);
-
+                setAuthUser(data); 
             } catch (error) {
-                console.log(error);
-                console.log("error fetching auth user");
+                console.log("Error fetching auth user", error);
+            } finally {
+                setIsLoading(false); 
             }
-        }
+        };
         fetchAuthUser();
-    },[])
+    }, []);
 
     return (
-        <AuthContext.Provider value={{ authUser, setAuthUser }}>
+        <AuthContext.Provider value={{ authUser, setAuthUser, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

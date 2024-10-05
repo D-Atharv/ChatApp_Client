@@ -8,7 +8,7 @@ import { useAuthContext } from '@/context/AuthContext';
 
 export default function SignIn() {
     const router = useRouter();
-    const { authUser } = useAuthContext();
+    const { authUser, isLoading } = useAuthContext();
     const { signIn } = useSignIn();
     
     const [inputs, setInputs] = useState({
@@ -34,10 +34,14 @@ export default function SignIn() {
     };
 
     useEffect(() => {
-        if (authUser) {
+        if (!isLoading && authUser) {
             router.push("/chat");
         }
-    }, [authUser, router]);
+    }, [authUser, isLoading, router]);
+
+    if (isLoading || loading) {
+        return <p className="text-gray-200">Loading...</p>;
+    }
 
     return (
         <div className="min-h-screen bg-cover bg-center bg-fixed flex flex-col justify-center items-center px-8"
@@ -99,3 +103,4 @@ export default function SignIn() {
         </div>
     );
 }
+
