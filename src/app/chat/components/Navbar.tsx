@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import eye from '../../../../styles/svg/eye-solid.svg';
-import dp from '../../../../styles/svg/eye-solid.svg';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLogOut } from '@/hooks/auth/useLogout';
 

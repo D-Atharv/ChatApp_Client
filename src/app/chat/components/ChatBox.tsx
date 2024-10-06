@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { io } from 'socket.io-client';
 import eye from '../../../../styles/svg/eye-solid.svg';
 import { useAuthContext } from '@/context/AuthContext';
+import { fetchMessages } from '../../../server/fetchMessage'; 
 
 interface Message {
   id: string;
@@ -31,43 +32,32 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName }) => {
   const socket = useRef<any>(null);
 
   useEffect(() => {
-    const fetchMessages = async () => {
+    const fetchAndSetMessages = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/message/groups/${groupId}/allMessages`);
-        const data = await response.json();
-
-        if (data.response === 'success') {
-          setMessages(data.data);
-        } else {
-          console.error('Failed to fetch messages:', data.message);
-        }
+        const fetchedMessages = await fetchMessages(groupId); 
+        setMessages(fetchedMessages);
       } catch (error) {
         console.error('Error fetching messages:', error);
       } finally {
         setLoading(false);
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 0); // Ensure this runs after messages are rendered
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }
     };
 
-    fetchMessages();
+    fetchAndSetMessages();
   }, [groupId]);
 
   useEffect(() => {
     if (!socket.current) {
-      socket.current = io('http://localhost:3000' as string); 
+      socket.current = io('http://localhost:3000');
 
       socket.current.emit('join_group', groupId);
 
       socket.current.on('receive_message', (message: Message) => {
-        // Ignore messages that were added optimistically (already in the list)
         if (!optimisticMessageIds.includes(message.id)) {
           setMessages((prevMessages) => [...prevMessages, message]);
-          setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-          }, 0);
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
       });
     }
@@ -78,7 +68,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName }) => {
         socket.current = null;
       }
     };
-  }, [groupId, optimisticMessageIds]); // Add optimisticMessageIds to dependencies
+  }, [groupId, optimisticMessageIds]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim() === '') return;
@@ -109,20 +99,18 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName }) => {
       senderId: authUser.id,
     });
 
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 0);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]); 
+  }, [messages]);
 
   return (
     <div className="flex-1 relative bg-gray-700 rounded-xl">
       <header className="bg-gray-900 p-4 text-gray-400 rounded-xl rounded-b-none">
         <div className="w-full h-12 rounded-full overflow-hidden flex justify-start items-center">
-          <h1 className='pr-5 text-[1.4em] font-bold'>Back</h1>
+          <h1 className="pr-5 text-[1.4em] font-bold">Back</h1>
           <Image src={eye} alt="User Avatar" width={48} height={48} className="object-cover" />
           <h1 className="text-2xl ml-4 font-semibold">{groupName}</h1>
         </div>
@@ -133,8 +121,17 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName }) => {
           <p className="text-gray-400">Loading messages...</p>
         ) : (
           messages.map((message) => (
-            <div key={message.id} className={`flex mb-4 ${message.senderId === authUser.id ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[40%] break-words ${message.senderId === authUser.id ? 'bg-indigo-500' : 'bg-gray-800'} font-semibold text-white rounded-xl p-3`}>
+            <div
+              key={message.id}
+              className={`flex mb-4 ${
+                message.senderId === authUser.id ? 'justify-end' : 'justify-start'
+              }`}
+            >
+              <div
+                className={`max-w-[40%] break-words ${
+                  message.senderId === authUser.id ? 'bg-indigo-500' : 'bg-gray-800'
+                } font-semibold text-white rounded-xl p-3`}
+              >
                 <p>{message.content}</p>
               </div>
             </div>
@@ -160,7 +157,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName }) => {
             }}
             style={{ lineHeight: '1.5' }}
           />
-          <button onClick={handleSendMessage} className="p-3 rounded-xl bg-indigo-500 text-white hover:bg-indigo-600">
+          <button
+            onClick={handleSendMessage}
+            className="p-3 rounded-xl bg-indigo-500 text-white hover:bg-indigo-600"
+          >
             Send
           </button>
         </div>
