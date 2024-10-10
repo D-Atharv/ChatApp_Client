@@ -2,56 +2,35 @@ import React, { useState, useEffect } from 'react';
 
 interface User {
   name: string;
-  password: string;
   image: string | null;
 }
 
-interface ModalProps {
+interface UserUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
+  onUpdateUser: (name: string, image: File | null) => void; // Pass a callback to handle updates
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
-  const [formData, setFormData] = useState({
-    image: null as File | null,
-    name: '',
-    password: '',
-  });
+const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ isOpen, onClose, user, onUpdateUser }) => {
+  const [name, setName] = useState<string>('');
+  const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
     if (user) {
-      setFormData({
-        image: null,
-        name: user.name,
-        password: user.password,
-      });
+      setName(user.name);
     }
   }, [user]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData({
-        ...formData,
-        image: e.target.files[0],
-      });
+      setImage(e.target.files[0]);
     }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Form data:', formData);
-    onClose(); 
+    onUpdateUser(name, image); // Call the updateUser function passed in props
   };
 
   if (!isOpen) return null;
@@ -62,20 +41,18 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-[90%] sm:max-w-[80%] md:max-w-md lg:max-w-lg p-4 sm:p-6 lg:p-8 max-h-full bg-white rounded-lg shadow dark:bg-gray-700"
-        onClick={(e) => e.stopPropagation()}
+        className="relative p-4 w-full max-w-md max-h-full bg-white rounded-lg shadow dark:bg-gray-700"
+        onClick={(e) => e.stopPropagation()} 
       >
-        <div className="flex items-center justify-between border-b pb-4 dark:border-gray-600">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Update Profile
-          </h3>
+        <div className="flex items-center justify-between p-4 border-b dark:border-gray-600">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Update Profile</h3>
           <button
             type="button"
-            className="text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg p-2"
+            className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
             onClick={onClose}
           >
             <svg
-              className="w-5 h-5"
+              className="w-3 h-3"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 14 14"
@@ -92,92 +69,48 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
           </button>
         </div>
 
-        <div className="flex flex-col items-center my-4">
-          <label
-            htmlFor="image"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
-            Upload Image
-          </label>
-          <input
-            type="file"
-            id="image"
-            name="image"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-          />
-          {formData.image && (
-            <img
-              src={URL.createObjectURL(formData.image)}
-              alt="Uploaded preview"
-              className="mt-4 rounded-full w-24 h-24 object-cover"
+        <form onSubmit={handleSubmit} className="p-4">
+          <div className="mb-4">
+            <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 w-full dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+              placeholder="Enter name"
+              required
             />
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 mb-4 grid-cols-2">
-            <div className="col-span-2">
-              <label
-                htmlFor="name"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                required
-              />
-            </div>
-            <div className="col-span-2">
-              <label
-                htmlFor="password"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                id="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                required
-              />
-            </div>
           </div>
 
-          <div className="w-full flex flex-col sm:flex-row gap-2">
-            <div className="w-full">
-              <button
-                type="button"
-                className="bg-red-600 text-white rounded-lg px-3 py-2 w-full hover:bg-red-700"
-              >
-                Deactivate Account 
-              </button>
-            </div>
-            <div className="flex gap-2 w-full mt-2 sm:mt-0">
-              <button
-                type="button"
-                className="bg-gray-200 text-gray-700 rounded-lg px-3 py-2 w-full hover:bg-gray-300"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white rounded-lg px-3 py-2 w-full hover:bg-blue-700"
-              >
-                Update
-              </button>
-            </div>
+          <div className="mb-4">
+            <label htmlFor="image" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Profile Image
+            </label>
+            <input
+              type="file"
+              id="image"
+              onChange={handleImageChange}
+              className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 w-full dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700"
+            >
+              Update
+            </button>
           </div>
         </form>
       </div>
@@ -185,4 +118,4 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
   );
 };
 
-export default Modal;
+export default UserUpdateModal;
