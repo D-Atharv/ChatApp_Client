@@ -124,21 +124,22 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
           messages.map((message) => (
             <div
               key={message.id}
-              className={`flex mb-4 ${
-                message.senderId === authUser.id ? 'justify-end' : 'justify-start'
-              }`}
+              className={`flex mb-4 ${message.senderId === authUser.id ? 'justify-end' : 'justify-start'
+                }`}
             >
               <div
-                className={`break-words w-auto lg:max-w-[35em] ${
-                  message.senderId === authUser.id
+                className={`break-words w-auto max-w-full sm:max-w-xs md:max-w-[16em] between_custom:max-w-[12rem] lg:max-w-md xl:max-w-lg ${message.senderId === authUser.id
                     ? 'bg-indigo-500'
                     : 'bg-gray-800'
-                } font-semibold text-white rounded-xl p-3`}
+                  } font-semibold text-white rounded-xl p-3`}
                 style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
               >
                 <p>{message.content}</p>
               </div>
             </div>
+
+
+
           ))
         )}
         <div ref={messagesEndRef} />
@@ -158,9 +159,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
           />
           <button
             onClick={handleSendMessage}
-            className={`p-3 rounded-xl bg-indigo-500 text-white hover:bg-indigo-600 ${
-              isSending ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`p-3 rounded-xl bg-indigo-500 text-white hover:bg-indigo-600 ${isSending ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             disabled={isSending}
           >
             Send
