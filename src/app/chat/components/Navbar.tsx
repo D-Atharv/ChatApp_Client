@@ -12,6 +12,7 @@ export const Navbar = () => {
     const logout = useLogOut();
     const dropdownRef = useRef<HTMLDivElement>(null); // To track the dropdown DOM element
 
+
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
     };
