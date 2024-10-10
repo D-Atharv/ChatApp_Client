@@ -58,7 +58,7 @@ export default function Login() {
         <div className="min-h-screen bg-cover bg-center bg-fixed flex flex-col justify-center items-center px-8"
             style={{ backgroundImage: `url(${bg_img.src})`, backgroundRepeat: 'no-repeat' }}>
             <main className="bg-black p-8 rounded-lg sm:w-96 lg:w-96 max-w-md shadow-md shadow-c_white">
-                <h1 className="text-2xl font-extrabold text-c_blue mb-6 text-center">LOGIN</h1>
+                <h1 className="text-2xl font-extrabold text-blue-900 mb-6 text-center">LOGIN</h1>
 
                 <form onSubmit={handleSubmitForm}>
                     <div className="mb-4">
