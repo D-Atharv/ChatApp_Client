@@ -1,20 +1,17 @@
-"use client";
-
 import React, { useState } from 'react';
 
 interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddUser: (name: string, email: string) => void;
+  onAddUser: (email: string) => void; 
 }
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onAddUser }) => {
-  const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
 
   const handleAddUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onAddUser(name, email); 
+    onAddUser(email);
     onClose(); 
   };
 
@@ -57,24 +54,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onAddUser 
         <form className="p-4" onSubmit={handleAddUser}>
           <div className="mb-4">
             <label
-              htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 w-full dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-              placeholder="Enter name"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
               htmlFor="email"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
@@ -91,7 +70,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onAddUser 
             />
           </div>
 
-          {/* Keep Add User and Cancel buttons in the same row */}
           <div className="flex gap-x-2">
             <button
               type="button"

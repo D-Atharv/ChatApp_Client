@@ -31,10 +31,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
   const { authUser } = useAuthContext();
   const socket = useRef<any>(null);
 
+  // Clear messages on group change and ensure the socket reconnects properly.
   useEffect(() => {
     if (!socket.current) {
       socket.current = io('http://localhost:3000');
     }
+
+    // Clear the messages when switching to a new group
+    setMessages([]);
 
     socket.current.emit('join_group', groupId);
 
@@ -64,7 +68,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
       socket.current.emit('leave_group', groupId);
       socket.current.off('receive_message', handleReceiveMessage);
     };
-  }, [groupId]);
+  }, [groupId]); // Ensure that this effect runs every time `groupId` changes
 
   const handleSendMessage = async () => {
     if (newMessage.trim() === '' || isSending) return;
@@ -79,6 +83,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
       createdAt: new Date().toISOString(),
     };
 
+    // Emit the new message to the server
     socket.current.emit('send_message', newMessageObj);
 
     setNewMessage('');
@@ -94,6 +99,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
     }
   };
 
+  // Auto-scroll to the latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -137,9 +143,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
                 <p>{message.content}</p>
               </div>
             </div>
-
-
-
           ))
         )}
         <div ref={messagesEndRef} />
