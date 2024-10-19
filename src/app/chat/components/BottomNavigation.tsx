@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import React from 'react';
 import profile from '../../../../styles/svg/profile.svg';
 import search from '../../../../styles/svg/search.svg';
 import Image from 'next/image';
@@ -15,7 +14,12 @@ const variants = {
   }
 }
 
-const BottomNavigation = () => {
+interface BottomNavigationProps {
+  flip: boolean;
+  setFlip: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const BottomNavigation: React.FC<BottomNavigationProps> = ({ flip, setFlip }) => {
   return (
     <div className="absolute bottom-2 inset-x-0 max-w-full mx-2 my-2 rounded-lg bg-gray-800 py-1.5 border-t border-gray-600">
       <div className="flex justify-around">
@@ -29,6 +33,7 @@ const BottomNavigation = () => {
             alt="profile"
             width={30}
             height={30}
+            onClick={() => setFlip(prev => !prev)}
             />
         </motion.div>
 

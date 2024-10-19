@@ -13,7 +13,6 @@ export default function ChatHome() {
     const [selectedGroup, setSelectedGroup] = useState<{ groupId: string, groupName: string } | null>(null);
     const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
     const [showChatOnSmallScreen, setShowChatOnSmallScreen] = useState<boolean>(false);
-
     useEffect(() => {
         if (!authUser) {
             router.push('/login');
@@ -67,7 +66,7 @@ export default function ChatHome() {
                     ) : (
                         <div className="flex w-full">
                             <div className="w-[30%]">
-                                <ProfileCards onSelectGroup={handleSelectGroup} />
+                                <ProfileCards onSelectGroup={handleSelectGroup} />                    
                             </div>
 
                             <div className="w-[70%] pl-8 ">
