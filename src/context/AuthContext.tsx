@@ -1,5 +1,7 @@
 'use client';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import Loader from '../components/ui/animation/LoadingSpinner';
 
 interface AuthContextType {
     authUser: any;
@@ -9,9 +11,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [authUser, setAuthUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [showLoader, setShowLoader] = useState(false);
 
     const fetchAuthUser = async () => {
         try {
@@ -25,20 +28,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
             setAuthUser(data);
         } catch (error) {
-            console.log("Error fetching auth user", error);
+            console.error("Error fetching auth user", error);
             setAuthUser(null);
         } finally {
-            setIsLoading(false);
+            setShowLoader(true);
+            setTimeout(() => {
+                setIsLoading(false);
+                setShowLoader(false);
+            },600);
         }
     };
 
     useEffect(() => {
-        fetchAuthUser(); 
+        fetchAuthUser();
     }, []);
 
     return (
         <AuthContext.Provider value={{ authUser, setAuthUser, isLoading }}>
-            {children}
+            {showLoader || isLoading ? <Loader /> : children}
         </AuthContext.Provider>
     );
 };

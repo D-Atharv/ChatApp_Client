@@ -37,7 +37,7 @@ export const Navbar = () => {
 
     const dropdownVariants = {
         hidden: { opacity: 0, y: -10 },
-        visible: { opacity: 1, y: 0, transition: { type:'spring', stiffness: 300, damping: 20 } },
+        visible: { opacity: 1, y: 0, transition: { type:'damping', stiffness: 300, damping: 20 } },
         exit: { opacity: 0, y: -10, transition: { duration: 0.2 } }
     };
 

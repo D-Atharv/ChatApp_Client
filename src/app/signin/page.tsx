@@ -5,6 +5,7 @@ import Link from 'next/link';
 import bg_img from '../../../styles/image.png';
 import { useSignIn } from '@/hooks/auth/useSignin';
 import { useAuthContext } from '@/context/AuthContext';
+import Loader from '@/components/ui/animation/LoadingSpinner';
 
 export default function SignIn() {
     const router = useRouter();
@@ -18,6 +19,7 @@ export default function SignIn() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showLoader, setShowLoader] = useState(false);
 
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,6 +28,11 @@ export default function SignIn() {
 
         try {
             await signIn(inputs.name, inputs.email, inputs.password);
+            setShowLoader(true);
+            setTimeout(() => {
+                router.push("/chat");
+                setShowLoader(false);
+            }, 600);
         } catch (error: any) {
             setError(error.message || 'SignUp failed');
         } finally {
@@ -35,12 +42,18 @@ export default function SignIn() {
 
     useEffect(() => {
         if (!isLoading && authUser) {
-            router.push("/chat");
+            setShowLoader(true);
+            const timer = setTimeout(() => {
+                router.push("/chat");
+                setShowLoader(false);
+            }, 600);
+
+            return () => clearTimeout(timer);
         }
     }, [authUser, isLoading, router]);
 
-    if (isLoading || loading) {
-        return <p className="text-gray-200">Loading...</p>;
+    if (isLoading || loading || showLoader) {
+        return <Loader/>;
     }
 
     return (
@@ -103,4 +116,3 @@ export default function SignIn() {
         </div>
     );
 }
-

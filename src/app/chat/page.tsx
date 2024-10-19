@@ -6,7 +6,7 @@ import { useAuthContext } from '@/context/AuthContext';
 import { ChatBox } from "./components/ChatBox";
 import { Navbar } from "./components/Navbar";
 import { ProfileCards } from "./components/ProfileCards";
-
+import Loader from "@/components/ui/animation/LoadingSpinner";
 export default function ChatHome() {
     const { authUser } = useAuthContext();
     const router = useRouter();
@@ -30,7 +30,7 @@ export default function ChatHome() {
     }, []);
 
     if (!authUser) {
-        return <h1>Not authenticated</h1>;
+        return <Loader />;
     }
 
     const handleSelectGroup = (groupId: string, groupName: string) => {
