@@ -97,40 +97,6 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
     }
   };
 
-  // const handleUpdateUser = async (name: string, image: File | null, newPassword: string) => {
-  //   try {
-  //     let response;
-  //     if (image) {
-  //       const formData = new FormData();
-  //       formData.append('name', name);
-  //       formData.append('image', image);
-  //       formData.append('newPassword', newPassword);
-
-  //       response = await fetch('/api/user/updateUser', {
-  //         method: 'PATCH',
-  //         body: formData,
-  //       });
-  //     } else {
-  //       response = await fetch('/api/user/updateUser', {
-  //         method: 'PATCH',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({ name, image: null, newPassword }),
-  //       });
-  //     }
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       console.log('User updated:', data);
-  //     } else {
-  //       console.error('Error updating user:', data.message);
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to update user:', error);
-  //   }
-  // };
-
   const handleUpdateUser = async (name: string, image: File | null, newPassword: string) => {
     try {
       let response;
