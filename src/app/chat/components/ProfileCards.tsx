@@ -12,7 +12,7 @@ interface User {
   userId: string;
   name: string;
   email: string;
-  password: string;
+  newPassword: string;
   image: string | null;
 }
 
@@ -97,13 +97,48 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
     }
   };
 
-  const handleUpdateUser = async (name: string, image: File | null) => {
+  // const handleUpdateUser = async (name: string, image: File | null, newPassword: string) => {
+  //   try {
+  //     let response;
+  //     if (image) {
+  //       const formData = new FormData();
+  //       formData.append('name', name);
+  //       formData.append('image', image);
+  //       formData.append('newPassword', newPassword);
+
+  //       response = await fetch('/api/user/updateUser', {
+  //         method: 'PATCH',
+  //         body: formData,
+  //       });
+  //     } else {
+  //       response = await fetch('/api/user/updateUser', {
+  //         method: 'PATCH',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({ name, image: null, newPassword }),
+  //       });
+  //     }
+
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       console.log('User updated:', data);
+  //     } else {
+  //       console.error('Error updating user:', data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to update user:', error);
+  //   }
+  // };
+
+  const handleUpdateUser = async (name: string, image: File | null, newPassword: string) => {
     try {
       let response;
       if (image) {
         const formData = new FormData();
         formData.append('name', name);
         formData.append('image', image);
+        formData.append('newPassword', newPassword);
 
         response = await fetch('/api/user/updateUser', {
           method: 'PATCH',
@@ -115,20 +150,22 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name, image: null }),
+          body: JSON.stringify({ name, image: null, newPassword }),
         });
       }
 
-      const data = await response.json();
       if (response.ok) {
+        const data = await response.json();
         console.log('User updated:', data);
       } else {
-        console.error('Error updating user:', data.message);
+        const errorText = await response.text(); // Parse text if it's not JSON
+        console.error('Error updating user:', errorText);
       }
     } catch (error) {
       console.error('Failed to update user:', error);
     }
   };
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -183,11 +220,11 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
               <div className="flex items-center justify-between mb-4 p-4 relative">
                 <h5 className="text-xl font-bold leading-none text-white">Chat</h5>
                 <div className="relative">
-                  <motion.button 
-                  onClick={toggleDropdown} 
-                  whileHover={{ scale: 1.1 }} 
-                  whileTap={{ scale: 0.9 }}>
-                    <Image src={plus} alt="Options" width={20} height={20}  />
+                  <motion.button
+                    onClick={toggleDropdown}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}>
+                    <Image src={plus} alt="Options" width={20} height={20} />
                   </motion.button>
                   <AnimatePresence>
                     {dropdownOpen && (
@@ -217,14 +254,6 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
                               className="block w-full text-left px-4 py-2 text-sm text-gray-100 hover:bg-gray-600 dark:hover:bg-gray-800 dark:text-gray-200 dark:hover:text-white"
                             >
                               Add New User
-                            </motion.button>
-                          </motion.li>
-                          <motion.li whileTap={{ scale: 0.95 }}>
-                            <motion.button
-                              onClick={() => openUpdateUserModal(groups[0].users[0])}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                            >
-                              Update Profile
                             </motion.button>
                           </motion.li>
                         </ul>

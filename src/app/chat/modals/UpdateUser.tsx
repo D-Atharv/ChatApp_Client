@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface User {
   name: string;
-  password: string;
+  newPassword: string;
   image: string | null;
 }
 
@@ -11,7 +11,7 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
-  onUpdateUser: (name: string, image: File | null) => void;
+  onUpdateUser: (name: string, image: File | null, newPassword: string) => void;
 }
 
 const modalVariants = {
@@ -24,7 +24,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, onUpdateUser }) =>
   const [formData, setFormData] = useState({
     image: null as File | null,
     name: '',
-    password: '',
+    newPassword: '',
   });
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, onUpdateUser }) =>
       setFormData({
         image: null,
         name: user.name,
-        password: user.password,
+        newPassword: user.newPassword,
       });
     }
   }, [user]);
@@ -56,7 +56,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, onUpdateUser }) =>
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onUpdateUser(formData.name, formData.image);
+    onUpdateUser(formData.name, formData.image,formData.newPassword);
     onClose();
   };
 
@@ -136,14 +136,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, onUpdateUser }) =>
                   />
                 </div>
                 <div className="col-span-2">
-                  <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  <label htmlFor="newPassword" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Password
                   </label>
                   <input
                     type="password"
-                    name="password"
+                    name="newPassword"
                     id="password"
-                    value={formData.password}
+                    value={formData.newPassword}
                     onChange={handleInputChange}
                     className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white"
                     required
