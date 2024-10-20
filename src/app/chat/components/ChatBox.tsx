@@ -7,6 +7,7 @@ import { fetchMessages } from '../../../server/fetchMessage';
 import back from '../../../../styles/svg/arrow_left.svg';
 import Image from 'next/image';
 
+const notificationSound = '/sounds/notification.mp3';
 interface Message {
   id: string;
   content: string;
@@ -21,35 +22,27 @@ interface ChatBoxProps {
   onBackClick?: () => void;
 }
 
-const socket = io('http://localhost:3000'); 
+const socket = io('http://localhost:3000');
 
 export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClick }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [lastPlayedTime, setLastPlayedTime] = useState<number>(0);  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const { authUser } = useAuthContext();
 
   useEffect(() => {
     setMessages([]);
+    setLoading(true);
 
     socket.emit('join_group', groupId);
 
-    const handleReceiveMessage = (message: Message) => {
-      if (message.groupId === groupId) {
-        setMessages((prevMessages) => [...prevMessages, message]);
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }
-    };
-
-    socket.off('receive_message'); 
-    socket.on('receive_message', handleReceiveMessage); 
-
     const fetchAndSetMessages = async () => {
       try {
-        setLoading(true);
         const fetchedMessages = await fetchMessages(groupId);
         setMessages(fetchedMessages);
       } catch (error) {
@@ -64,9 +57,36 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
 
     return () => {
       socket.emit('leave_group', groupId);
-      socket.off('receive_message', handleReceiveMessage); 
+      socket.off('receive_message'); 
     };
-  }, [groupId]);
+  }, [groupId]);  
+
+  useEffect(() => {
+    const handleReceiveMessage = (message: Message) => {
+      if (message.groupId === groupId) {
+        setMessages((prevMessages) => [...prevMessages, message]);
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+        const currentTime = new Date().getTime(); 
+        const fiveMinutesInMs = 5* 10 * 1000;  
+
+        if (currentTime - lastPlayedTime >= fiveMinutesInMs) {
+          if (message.senderId !== authUser.id && audioRef.current) {
+            audioRef.current.play();
+            setLastPlayedTime(currentTime);  // Update the last played time
+          }
+        } else {
+          console.log('Notification sound suppressed because it is within the 5-minute window.');
+        }
+      }
+    };
+
+    socket.on('receive_message', handleReceiveMessage);
+
+    return () => {
+      socket.off('receive_message', handleReceiveMessage);
+    };
+  }, [groupId, lastPlayedTime]); 
 
   const handleSendMessage = async () => {
     if (newMessage.trim() === '' || isSending) return;
@@ -165,6 +185,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
           </button>
         </div>
       </div>
+
+      <audio ref={audioRef} src={notificationSound} preload="auto" />
     </div>
   );
 };

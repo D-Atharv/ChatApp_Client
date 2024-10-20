@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import Fuse from 'fuse.js';  
 import plus from '../../../../styles/svg/plus.svg';
 import { fetchGroups } from '../../../server/fetchGroup';
 import UserUpdateModal from '../modals/UpdateUser';
 import AddUserModal from '../modals/AddUser';
 import BottomNavigation from './BottomNavigation';
 import { useAuthContext } from '@/context/AuthContext';
+import ImageModal from '../modals/ImageModal';
 
 interface User {
   userId: string;
@@ -37,13 +39,30 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [flip, setFlip] = useState<boolean>(true);
 
+  const [isImageModalOpen, setIsImageModalOpen] = useState<boolean>(false);
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(''); // URL for the modal image
+  const [modalInitials, setModalInitials] = useState<string>(''); // Initials for modal if image is missing
+
+  const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>(''); 
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
+
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const profileCardsRef = useRef<HTMLDivElement>(null); 
+
+  const fuseOptions = {
+    keys: ['users.name'],
+    threshold: 0.3,  
+  };
 
   useEffect(() => {
     const fetchAndSetGroups = async () => {
       try {
         const fetchedGroups = await fetchGroups();
         setGroups(fetchedGroups);
+        setFilteredGroups(fetchedGroups);  
       } catch (error: any) {
         setError(error.message);
       } finally {
@@ -54,6 +73,15 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
     fetchAndSetGroups();
   }, []);
 
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredGroups(groups); 
+    } else {
+      const fuse = new Fuse(groups, fuseOptions);
+      const result = fuse.search(searchQuery);
+      setFilteredGroups(result.map(({ item }) => item));
+    }
+  }, [searchQuery, groups]);
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
@@ -132,32 +160,31 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
     }
   };
 
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [dropdownOpen]);
-
-  const handleGroupSelection = (group: Group) => {
+  const handleGroupSelection = (group: Group, event: React.MouseEvent) => {
+    event.stopPropagation();
     const groupName = group.isGroupChat
       ? 'Group Chat'
       : group.users.length > 0
         ? group.users[0].name
         : 'Unnamed Group';
+
+    setSelectedGroupId(group.id);
+
     onSelectGroup(group.id, groupName);
+
+    setIsSearchActive(false);
+    setSearchQuery('');
   };
 
   const getUserInitials = (name: string) => {
     const [firstName = '', lastName = ''] = name.split(' ');
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  const openImageModal = (imageUrl: string | null, initials: string) => {
+    setModalImageUrl(imageUrl);
+    setModalInitials(initials);
+    setIsImageModalOpen(true);
   };
 
   if (loading) {
@@ -170,10 +197,25 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
 
   return (
     <>
-      <UserUpdateModal isOpen={isUpdateModalOpen} onClose={closeModals} user={selectedUser} onUpdateUser={handleUpdateUser} />
-      <AddUserModal isOpen={isAddUserModalOpen} onClose={closeModals} onAddUser={handleAddUser} />
+      <UserUpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={closeModals}
+        user={selectedUser}
+        onUpdateUser={handleUpdateUser} />
 
-      <div className="relative w-full h-full p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow border border-gray-200 overflow-y-auto bg-blue-gradient" style={{ height: 'calc(100vh - 8em)', paddingBottom: '20px' }}>
+      <AddUserModal
+        isOpen={isAddUserModalOpen}
+        onClose={closeModals}
+        onAddUser={handleAddUser} />
+
+      <ImageModal
+        isOpen={isImageModalOpen}
+        imageUrl={modalImageUrl}
+        initials={modalInitials}
+        onClose={() => setIsImageModalOpen(false)}
+      />
+
+      <div ref={profileCardsRef} className="relative w-full h-full p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow border border-gray-200 overflow-y-auto bg-blue-gradient" style={{ height: 'calc(100vh - 8em)', paddingBottom: '20px' }}>
         <motion.div
           transition={{ duration: 0.9, ease: 'circInOut' }}
           animate={{ rotateY: flip ? 0 : 180 }}
@@ -230,24 +272,46 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
               </div>
 
               <div className="flow-root">
-                <Reorder.Group axis="y" values={groups} onReorder={setGroups} className="divide-y divide-gray-200">
-                  {groups.map((group) => (
+                <Reorder.Group axis="y" values={filteredGroups} onReorder={setFilteredGroups} className="divide-y divide-gray-200">
+                  {filteredGroups.map((group) => (
                     <Reorder.Item key={group.id} value={group}>
-                      <li className="py-4 px-2 rounded-sm cursor-pointer hover:bg-sky-950" onClick={() => handleGroupSelection(group)}>
+                      <li 
+                        className={`py-4 px-2 rounded-sm cursor-pointer hover:bg-sky-950 ${
+                          selectedGroupId === group.id ? 'bg-neutral-800' : ''
+                        }`}
+                        onClick={(event) => handleGroupSelection(group, event)}
+                      >
                         <div className="flex items-center rounded-xl">
                           <div className="relative flex-shrink-0">
                             {group.users[0]?.image ? (
-                              <Image
-                                className="w-10 h-10 rounded-full cursor-pointer"
-                                src={group.users[0].image}
-                                alt={group.users[0].name}
-                                width={40}
-                                height={40} />
+                              <div
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation(); 
+                                  openImageModal(group.users[0].image, getUserInitials(group.users[0].name));
+                                }}
+                              >
+                                <Image
+                                  className="w-10 h-10 rounded-full"
+                                  src={group.users[0].image}
+                                  alt={group.users[0].name}
+                                  width={40}
+                                  height={40}
+                                />
+                              </div>
                             ) : (
-                              <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
-                                <span className="font-medium text-gray-600 dark:text-gray-300">
-                                  {getUserInitials(group.users[0]?.name || 'User')}
-                                </span>
+                              <div
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation(); 
+                                  openImageModal(null, getUserInitials(group.users[0]?.name || 'User'));
+                                }}
+                              >
+                                <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                                  <span className="font-medium text-gray-600 dark:text-gray-300">
+                                    {getUserInitials(group.users[0]?.name || 'User')}
+                                  </span>
+                                </div>
                               </div>
                             )}
                             <span className="bottom-0 left-7 absolute w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
@@ -276,7 +340,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
               >
                 <div className='flex items-center justify-center my-10'>
                   <div className="m-10 max-w-sm rounded-lg border bg-white px-4 pt-8 pb-10 shadow-lg text-center  w-full">
-                    <div className="relative mx-auto w-36 h-36 rounded-full overflow-hidden flex items-center justify-center">
+                    <div className="relative mx-auto w-36 h-36 rounded-full overflow-hidden flex items-center justify-center cursor-pointer" onClick={() => openImageModal(authUser?.image || null, getUserInitials(authUser?.name || 'User'))}>
                       {authUser?.image ? (
                         <Image
                           src={authUser.image}
@@ -306,12 +370,18 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
                     </ul>
                   </div>
                 </div>
-
               </motion.div>
             </>
           )}
         </motion.div>
-        <BottomNavigation flip={flip} setFlip={setFlip} />
+        <BottomNavigation
+          flip={flip}
+          setFlip={setFlip}
+          isSearchActive={isSearchActive}
+          setIsSearchActive={setIsSearchActive}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
       </div>
     </>
   );
