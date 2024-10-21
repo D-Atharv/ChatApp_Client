@@ -19,7 +19,7 @@ export const useSignIn = () => {
             if (!response.ok) {
                 throw new Error(data.error || 'signIn failed');
             }
-            setAuthUser(data);
+            setAuthUser(null);
         }
         catch (error: any) {
             console.error('Signin Error:', error.message);

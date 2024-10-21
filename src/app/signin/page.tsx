@@ -30,7 +30,7 @@ export default function SignIn() {
             await signIn(inputs.name, inputs.email, inputs.password);
             setShowLoader(true);
             setTimeout(() => {
-                router.push("/chat");
+                router.push("/login");
                 setShowLoader(false);
             }, 600);
         } catch (error: any) {
@@ -39,22 +39,6 @@ export default function SignIn() {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        if (!isLoading && authUser) {
-            setShowLoader(true);
-            const timer = setTimeout(() => {
-                router.push("/chat");
-                setShowLoader(false);
-            }, 600);
-
-            return () => clearTimeout(timer);
-        }
-    }, [authUser, isLoading, router]);
-
-    if (isLoading || loading || showLoader) {
-        return <Loader/>;
-    }
 
     return (
         <div className="min-h-screen bg-cover bg-center bg-fixed flex flex-col justify-center items-center px-8"
