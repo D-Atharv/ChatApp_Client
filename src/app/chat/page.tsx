@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/context/AuthContext';
-import { ChatBox } from "./components/ChatBox";
-import { Navbar } from "./components/Navbar";
-import { ProfileCards } from "./components/ProfileCards";
+import { ChatBox } from "./components/chatbox/ChatBox";
+import { Navbar } from "./components/navbar/Navbar";
+import { ProfileCards } from "./components/profileCards/ProfileCards";
 import Loader from "@/components/ui/animation/LoadingSpinner";
 export default function ChatHome() {
     const { authUser } = useAuthContext();
@@ -66,7 +66,7 @@ export default function ChatHome() {
                     ) : (
                         <div className="flex w-full">
                             <div className="w-[30%]">
-                                <ProfileCards onSelectGroup={handleSelectGroup} />                    
+                                <ProfileCards onSelectGroup={handleSelectGroup} />
                             </div>
 
                             <div className="w-[70%] pl-8 ">

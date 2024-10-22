@@ -2,13 +2,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import Fuse from 'fuse.js';  
-import plus from '../../../../styles/svg/plus.svg';
-import { fetchGroups } from '../../../server/fetchGroup';
-import UserUpdateModal from '../modals/UpdateUser';
-import AddUserModal from '../modals/AddUser';
-import BottomNavigation from './BottomNavigation';
+import plus from '../../../../../styles/svg/plus.svg';
+import { fetchGroups } from '../../../../server/fetchGroup';
+import UserUpdateModal from '../../modals/UpdateUser';
+import AddUserModal from '../../modals/AddUser';
+import BottomNavigation from '../bottomNavigation/BottomNavigation';
 import { useAuthContext } from '@/context/AuthContext';
-import ImageModal from '../modals/ImageModal';
+import ImageModal from '../../modals/ImageModal';
 
 interface User {
   userId: string;
@@ -386,3 +386,5 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
     </>
   );
 };
+
+
