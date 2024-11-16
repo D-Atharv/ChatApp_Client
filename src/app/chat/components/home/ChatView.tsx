@@ -1,16 +1,7 @@
 import { ChatBox } from "@/app/chat/components/chatbox/ChatBox";
 import { ProfileCards } from "@/app/chat/components/profileCards/ProfileCards";
 import { WelcomeMessage } from "./WelcomeMessage";
-
-interface ChatViewProps {
-    isSmallScreen: boolean;
-    showChatOnSmallScreen: boolean;
-    selectedGroup: { groupId: string; groupName: string } | null;
-    onSelectGroup: (groupId: string, groupName: string) => void;
-    onBackClick: () => void;
-    userName?: string; 
-}
-
+import { ChatViewProps } from "../../../../../types/allTypes";
 export const ChatView = ({
     isSmallScreen,
     showChatOnSmallScreen,

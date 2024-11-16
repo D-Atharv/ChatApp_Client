@@ -1,14 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { Message } from './ChatBox';
+import { useEffect, useRef } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
+import { ChatMessagesProps } from '../../../../../types/allTypes';
 
-interface ChatMessagesProps {
-  messages: Message[];
-  loading: boolean;
-  groupId: string;
-}
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, loading  }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);

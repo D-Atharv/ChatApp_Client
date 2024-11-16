@@ -1,15 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import bg_img from '../../../styles/image.png';
 import { useSignIn } from '@/hooks/auth/useSignin';
-import { useAuthContext } from '@/context/AuthContext';
-import Loader from '@/components/ui/animation/LoadingSpinner';
 
 export default function SignIn() {
     const router = useRouter();
-    const { authUser, isLoading } = useAuthContext();
     const { signIn } = useSignIn();
     
     const [inputs, setInputs] = useState({
@@ -19,8 +16,6 @@ export default function SignIn() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [showLoader, setShowLoader] = useState(false);
-
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -28,13 +23,11 @@ export default function SignIn() {
 
         try {
             await signIn(inputs.name, inputs.email, inputs.password);
-            setShowLoader(true);
             setTimeout(() => {
                 router.push("/login");
-                setShowLoader(false);
             }, 600);
-        } catch (error: any) {
-            setError(error.message || 'SignUp failed');
+        } catch (error) {
+            setError('SignUp failed');
         } finally {
             setLoading(false);
         }

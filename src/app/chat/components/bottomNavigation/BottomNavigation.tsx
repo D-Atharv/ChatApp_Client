@@ -1,17 +1,9 @@
-import React from 'react';
 import SearchBar from './SearchBar';
 import IconButton from './IconButton';
 import profile from '../../../../../styles/svg/profile.svg';
 import search from '../../../../../styles/svg/search.svg';
+import { BottomNavigationProps } from '../../../../../types/allTypes';
 
-interface BottomNavigationProps {
-  flip: boolean;
-  setFlip: React.Dispatch<React.SetStateAction<boolean>>;
-  isSearchActive: boolean;
-  setIsSearchActive: React.Dispatch<React.SetStateAction<boolean>>;
-  searchQuery: string;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-}
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
   setFlip,

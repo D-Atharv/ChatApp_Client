@@ -43,8 +43,8 @@ export default function Login() {
             } else {
                 throw new Error(userData.error);
             }
-        } catch (error: any) {
-            setError(error.message || 'Login failed');
+        } catch (error) {
+            setError('Login failed');
         } finally {
             setLoading(false);
         }
@@ -109,7 +109,7 @@ export default function Login() {
                     </div>
                 </form>
                 <p className="mt-4 text-gray-400 text-center">
-                    Don't have an account? <Link href="/signin" className="text-c_blue hover:underline">Sign In</Link>
+                    Don&apost have an account? <Link href="/signin" className="text-c_blue hover:underline">Sign In</Link>
                 </p>
             </main>
         </div>

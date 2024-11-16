@@ -3,28 +3,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAuthContext } from '../../../../context/AuthContext';
-import { fetchMessages } from '../../../../server/fetchMessage';
+import { fetchMessages } from "../../../../../services/fetchMessage"
 import { ChatMessages } from './ChatMessages';
 import { ChatHeader } from './ChatHeader';
 import { ChatInput } from './ChatInput';
+import { ChatBoxProps, Message } from '../../../../../types/allTypes';
 
 const notificationSound = '/sounds/notification.mp3';
 
-export interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  groupId: string;
-  createdAt: string;
-}
-
-interface ChatBoxProps {
-  groupId: string;
-  groupName: string;
-  onBackClick?: () => void;
-}
-
-const socket = io('http://localhost:3000');
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
 
 export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClick }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -66,7 +53,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
         setMessages((prevMessages) => [...prevMessages, message]);
 
         const currentTime = new Date().getTime();
-        const fiveMinutesInMs = 5 * 10 * 1000;
+        const fiveMinutesInMs = 5 * 60 * 1000;
 
         if (currentTime - lastPlayedTime >= fiveMinutesInMs) {
           if (message.senderId !== authUser.id && audioRef.current) {
@@ -82,7 +69,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
     return () => {
       socket.off('receive_message', handleReceiveMessage);
     };
-  }, [groupId, lastPlayedTime,authUser.id]);
+  }, [groupId, lastPlayedTime, authUser.id]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim() === '' || isSending) return;

@@ -1,12 +1,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React from 'react';
-
-interface IconButtonProps {
-  src: string;
-  alt: string;
-  onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-}
+import { IconButtonProps } from '../../../../../types/allTypes';
 
 const IconButton: React.FC<IconButtonProps> = ({ src, alt, onClick }) => {
   const variants = {

@@ -1,14 +1,8 @@
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ImageModalProps } from '../../../../types/allTypes';
 
-interface ModalProps {
-  isOpen: boolean;
-  imageUrl: string | null;
-  initials: string;
-  onClose: () => void;
-}
-
-const ImageModal: React.FC<ModalProps> = ({ isOpen, imageUrl, initials, onClose }) => {
+const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageUrl, initials, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (

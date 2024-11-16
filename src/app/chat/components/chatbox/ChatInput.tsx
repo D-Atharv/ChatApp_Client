@@ -1,13 +1,7 @@
 'use client';
 
-import React, { useRef } from 'react';
-
-interface ChatInputProps {
-  newMessage: string;
-  setNewMessage: (message: string) => void;
-  handleSendMessage: () => void;
-  isSending: boolean;
-}
+import { useRef } from 'react';
+import { ChatInputProps } from '../../../../../types/allTypes';
 
 export const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, handleSendMessage, isSending }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);

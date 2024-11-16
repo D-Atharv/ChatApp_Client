@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface AddUserModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAddUser: (email: string) => void;
-}
+import { AddUserModalProps } from '../../../../types/allTypes';
 
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.8 },

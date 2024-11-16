@@ -3,30 +3,15 @@ import Image from 'next/image';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import Fuse from 'fuse.js';  
 import plus from '../../../../../styles/svg/plus.svg';
-import { fetchGroups } from '../../../../server/fetchGroup';
+import { fetchGroups, addUserToGroup } from '../../../../../services/fetchGroup';
+import { updateUser } from '../../../../../services/updateUser';
 import UserUpdateModal from '../../modals/UpdateUser';
 import AddUserModal from '../../modals/AddUser';
 import BottomNavigation from '../bottomNavigation/BottomNavigation';
 import { useAuthContext } from '@/context/AuthContext';
 import ImageModal from '../../modals/ImageModal';
+import { Group, User, ProfileCardsProps } from '../../../../../types/allTypes';
 
-interface User {
-  userId: string;
-  name: string;
-  email: string;
-  newPassword: string;
-  image: string | null;
-}
-
-interface Group {
-  id: string;
-  isGroupChat: boolean;
-  users: User[];
-}
-
-interface ProfileCardsProps {
-  onSelectGroup: (groupId: string, groupName: string) => void;
-}
 
 export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
   const { authUser } = useAuthContext();
@@ -58,6 +43,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
   };
 
   useEffect(() => {
+    
     const fetchAndSetGroups = async () => {
       try {
         const fetchedGroups = await fetchGroups();
@@ -81,7 +67,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
       const result = fuse.search(searchQuery);
       setFilteredGroups(result.map(({ item }) => item));
     }
-  }, [searchQuery, groups]);
+  }, [searchQuery, groups, fuseOptions]);
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
@@ -106,57 +92,19 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
 
   const handleAddUser = async (email: string) => {
     try {
-      const response = await fetch('/api/group/createGroup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ otherUserEmail: email }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        console.log('Group created:', data);
-      } else {
-        console.error('Error adding user:', data.message);
-      }
-    } catch (error) {
-      console.error('Failed to add user:', error);
+      await addUserToGroup(email);
+      setIsAddUserModalOpen(false);
+    } catch (err) {
+      console.error('Failed to add user:', err);
     }
   };
 
   const handleUpdateUser = async (name: string, image: File | null, newPassword: string) => {
     try {
-      let response;
-      if (image) {
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('image', image);
-        formData.append('newPassword', newPassword);
-
-        response = await fetch('/api/user/updateUser', {
-          method: 'PATCH',
-          body: formData,
-        });
-      } else {
-        response = await fetch('/api/user/updateUser', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ name, image: null, newPassword }),
-        });
-      }
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('User updated:', data);
-      } else {
-        const errorText = await response.text(); // Parse text if it's not JSON
-        console.error('Error updating user:', errorText);
-      }
-    } catch (error) {
-      console.error('Failed to update user:', error);
+      await updateUser(name, image, newPassword);
+      setIsUpdateModalOpen(false);
+    } catch (err) {
+      console.error('Failed to update user:', err);
     }
   };
 

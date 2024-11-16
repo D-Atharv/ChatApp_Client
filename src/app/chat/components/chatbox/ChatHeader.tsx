@@ -3,11 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import back from '../../../../../styles/svg/arrow_left.svg';
-
-interface ChatHeaderProps {
-  groupName: string;
-  onBackClick?: () => void;
-}
+import { ChatHeaderProps } from '../../../../../types/allTypes';
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ groupName, onBackClick }) => (
   <header className="bg-gray-900 p-4 text-gray-400 rounded-xl rounded-b-none">

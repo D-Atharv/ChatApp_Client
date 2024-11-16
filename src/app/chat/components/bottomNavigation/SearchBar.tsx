@@ -1,10 +1,4 @@
-import React from 'react';
-
-interface SearchBarProps {
-  searchQuery: string;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  setIsSearchActive: React.Dispatch<React.SetStateAction<boolean>>;
-}
+import { SearchBarProps } from '../../../../../types/allTypes';
 
 const SearchBar: React.FC<SearchBarProps> = ({
   searchQuery,

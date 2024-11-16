@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface User {
-  name: string;
-  newPassword: string;
-  image: string | null;
-}
-
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  user: User | null;
-  onUpdateUser: (name: string, image: File | null, newPassword: string) => void;
-}
+import { UpdateModalProps } from '../../../../types/allTypes';
 
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.8 },
@@ -20,7 +8,7 @@ const modalVariants = {
   exit: { opacity: 0, scale: 0.8 }
 };
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, onUpdateUser }) => {
+const Modal: React.FC<UpdateModalProps> = ({ isOpen, onClose, user, onUpdateUser }) => {
   const [formData, setFormData] = useState({
     image: null as File | null,
     name: '',
