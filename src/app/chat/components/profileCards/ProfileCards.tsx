@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useReducer, act } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import Fuse from 'fuse.js';
+import Fuse from 'fuse.js';  
 import plus from '../../../../../styles/svg/plus.svg';
 import { fetchGroups, addUserToGroup } from '../../../../../services/fetchGroup';
 import { updateUser } from '../../../../../services/updateUser';
@@ -11,64 +11,89 @@ import BottomNavigation from '../bottomNavigation/BottomNavigation';
 import { useAuthContext } from '@/context/AuthContext';
 import ImageModal from '../../modals/ImageModal';
 import { Group, User, ProfileCardsProps } from '../../../../../types/allTypes';
-import { useProfileCardsReducer } from './UseReducer';
+
 
 export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
   const { authUser } = useAuthContext();
-  const { state, actions } = useProfileCardsReducer();
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState<boolean>(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [flip, setFlip] = useState<boolean>(true);
+
+  const [isImageModalOpen, setIsImageModalOpen] = useState<boolean>(false);
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(''); // URL for the modal image
+  const [modalInitials, setModalInitials] = useState<string>(''); // Initials for modal if image is missing
+
+  const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>(''); 
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
+
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const profileCardsRef = useRef<HTMLDivElement>(null);
+  const profileCardsRef = useRef<HTMLDivElement>(null); 
 
   const fuseOptions = {
     keys: ['users.name'],
-    threshold: 0.3,
+    threshold: 0.3,  
   };
 
   useEffect(() => {
+    
     const fetchAndSetGroups = async () => {
       try {
         const fetchedGroups = await fetchGroups();
-        actions.setGroups(fetchedGroups);
-        actions.setLoading(false);
+        setGroups(fetchedGroups);
+        setFilteredGroups(fetchedGroups);  
       } catch (error) {
-        actions.setError('Failed to fetch groups');
+        setError('Failed to fetch groups');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchAndSetGroups();
-  }, [actions]);
+  }, []);
 
   useEffect(() => {
-    if (state.searchQuery.trim() === '') {
-      actions.setFilteredGroups(state.groups)
+    if (searchQuery.trim() === '') {
+      setFilteredGroups(groups); 
     } else {
-      const fuse = new Fuse(state.groups, fuseOptions);
-      const result = fuse.search(state.searchQuery);
-      actions.setFilteredGroups(result.map(({ item }) => item))
+      const fuse = new Fuse(groups, fuseOptions);
+      const result = fuse.search(searchQuery);
+      setFilteredGroups(result.map(({ item }) => item));
     }
-  }, [state.searchQuery, state.groups]);
+  }, [searchQuery, groups, fuseOptions]);
 
   const toggleDropdown = () => {
-    actions.toggleDropdown()
+    setDropdownOpen((prev) => !prev);
   };
 
   const openUpdateUserModal = (user: User) => {
-    actions.setUpdateModal(true, user)
+    setSelectedUser(user);
+    setIsUpdateModalOpen(true);
+    setDropdownOpen(false);
   };
 
   const openAddUserModal = () => {
-    actions.setAddUserModal(true);
+    setIsAddUserModalOpen(true);
+    setDropdownOpen(false);
   };
 
   const closeModals = () => {
-    actions.closeModals();
+    setIsUpdateModalOpen(false);
+    setIsAddUserModalOpen(false);
+    setSelectedUser(null);
   };
 
   const handleAddUser = async (email: string) => {
     try {
       await addUserToGroup(email);
-      actions.setAddUserModal(false);
+      setIsAddUserModalOpen(false);
     } catch (err) {
       console.error('Failed to add user:', err);
     }
@@ -77,7 +102,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
   const handleUpdateUser = async (name: string, image: File | null, newPassword: string) => {
     try {
       await updateUser(name, image, newPassword);
-      actions.setUpdateModal(false, null);
+      setIsUpdateModalOpen(false);
     } catch (err) {
       console.error('Failed to update user:', err);
     }
@@ -90,8 +115,13 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
       : group.users.length > 0
         ? group.users[0].name
         : 'Unnamed Group';
-    actions.setSelectedGroup(group.id);
+
+    setSelectedGroupId(group.id);
+
     onSelectGroup(group.id, groupName);
+
+    setIsSearchActive(false);
+    setSearchQuery('');
   };
 
   const getUserInitials = (name: string) => {
@@ -100,49 +130,48 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
   };
 
   const openImageModal = (imageUrl: string | null, initials: string) => {
-    actions.setImageModal(true, imageUrl, initials);
+    setModalImageUrl(imageUrl);
+    setModalInitials(initials);
+    setIsImageModalOpen(true);
   };
 
-
-  if (state.loading) {
+  if (loading) {
     return <p className="text-white">Loading groups...</p>;
   }
 
-  if (state.error) {
-    return <p className="text-red-500">{state.error}</p>;
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
   }
 
   return (
     <>
       <UserUpdateModal
-        isOpen={state.isUpdateModalOpen}
+        isOpen={isUpdateModalOpen}
         onClose={closeModals}
-        user={state.selectedUser}
-        onUpdateUser={handleUpdateUser}
-      />
+        user={selectedUser}
+        onUpdateUser={handleUpdateUser} />
 
       <AddUserModal
-        isOpen={state.isAddUserModalOpen}
+        isOpen={isAddUserModalOpen}
         onClose={closeModals}
-        onAddUser={handleAddUser}
-      />
+        onAddUser={handleAddUser} />
 
       <ImageModal
-        isOpen={state.isImageModalOpen}
-        imageUrl={state.modalImageUrl}
-        initials={state.modalInitials}
-        onClose={() => actions.setImageModal(false, null, '')}
+        isOpen={isImageModalOpen}
+        imageUrl={modalImageUrl}
+        initials={modalInitials}
+        onClose={() => setIsImageModalOpen(false)}
       />
 
       <div ref={profileCardsRef} className="relative w-full h-full p-4 max-w-full lg:max-w-lg bg-gray-900 rounded-xl shadow border border-gray-200 overflow-y-auto bg-blue-gradient" style={{ height: 'calc(100vh - 8em)', paddingBottom: '20px' }}>
         <motion.div
           transition={{ duration: 0.9, ease: 'circInOut' }}
-          animate={{ rotateY: state.flip ? 0 : 180 }}
+          animate={{ rotateY: flip ? 0 : 180 }}
           className="Card"
           style={{ perspective: '1000px' }}
         >
 
-          {state.flip ? (
+          {flip ? (
             <>
               <div className="flex items-center justify-between mb-4 p-4 relative">
                 <h5 className="text-xl font-bold leading-none text-white">Chat</h5>
@@ -154,7 +183,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
                     <Image src={plus} alt="Options" width={20} height={20} />
                   </motion.button>
                   <AnimatePresence>
-                    {state.dropdownOpen && (
+                    {dropdownOpen && (
                       <motion.div
                         ref={dropdownRef}
                         className="absolute right-0 mt-2 w-36 bg-gray-800 divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 z-50 sm:right-[-20px]"
@@ -169,7 +198,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
                         <ul className="py-2 ">
                           <motion.li whileTap={{ scale: 0.95 }}>
                             <motion.button
-                              onClick={() => openUpdateUserModal(state.groups[0].users[0])}
+                              onClick={() => openUpdateUserModal(groups[0].users[0])}
                               className="block w-full text-left px-4 py-2 text-sm text-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                             >
                               Update Profile
@@ -191,19 +220,13 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
               </div>
 
               <div className="flow-root">
-                <Reorder.Group
-                  axis="y"
-                  values={state.filteredGroups}
-                  onReorder={(updatedFilteredGroups) =>
-                    actions.setFilteredGroups(updatedFilteredGroups)
-                  }
-                >
-
-                  {state.filteredGroups.map((group) => (
+                <Reorder.Group axis="y" values={filteredGroups} onReorder={setFilteredGroups} className="divide-y divide-gray-200">
+                  {filteredGroups.map((group) => (
                     <Reorder.Item key={group.id} value={group}>
-                      <li
-                        className={`py-4 px-2 rounded-sm cursor-pointer hover:bg-sky-950 ${state.selectedGroupId === group.id ? 'bg-neutral-800' : ''
-                          }`}
+                      <li 
+                        className={`py-4 px-2 rounded-sm cursor-pointer hover:bg-sky-950 ${
+                          selectedGroupId === group.id ? 'bg-neutral-800' : ''
+                        }`}
                         onClick={(event) => handleGroupSelection(group, event)}
                       >
                         <div className="flex items-center rounded-xl">
@@ -212,7 +235,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
                               <div
                                 className="cursor-pointer"
                                 onClick={(e) => {
-                                  e.stopPropagation();
+                                  e.stopPropagation(); 
                                   openImageModal(group.users[0].image, getUserInitials(group.users[0].name));
                                 }}
                               >
@@ -228,7 +251,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
                               <div
                                 className="cursor-pointer"
                                 onClick={(e) => {
-                                  e.stopPropagation();
+                                  e.stopPropagation(); 
                                   openImageModal(null, getUserInitials(group.users[0]?.name || 'User'));
                                 }}
                               >
@@ -260,7 +283,7 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
             <>
               <motion.div
                 initial={{ rotateY: 180 }}
-                animate={{ rotateY: state.flip ? 180 : 180 }}
+                animate={{ rotateY: flip ? 180 : 180 }}
                 transition={{ duration: 0.9 }}
               >
                 <div className='flex items-center justify-center my-10'>
@@ -300,24 +323,15 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
           )}
         </motion.div>
         <BottomNavigation
-          flip={state.flip}
-          setFlip={actions.toggleFlip}
-          isSearchActive={state.isSearchActive}
-          setIsSearchActive={(value) =>
-            actions.setSearch(
-              typeof value === 'function' ? value(state.isSearchActive) : value,
-              state.searchQuery
-            )
-          }
-          searchQuery={state.searchQuery}
-          setSearchQuery={(value) =>
-            actions.setSearch(
-              state.isSearchActive,
-              typeof value === 'function' ? value(state.searchQuery) : value
-            )
-          }
+          flip={flip}
+          setFlip={setFlip}
+          isSearchActive={isSearchActive}
+          setIsSearchActive={setIsSearchActive}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
       </div>
     </>
   );
 };
+
