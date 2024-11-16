@@ -10,7 +10,7 @@ interface ChatMessagesProps {
   groupId: string;
 }
 
-export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, loading, groupId }) => {
+export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, loading  }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { authUser } = useAuthContext();
 

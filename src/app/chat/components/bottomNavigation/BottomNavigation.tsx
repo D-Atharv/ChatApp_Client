@@ -14,7 +14,6 @@ interface BottomNavigationProps {
 }
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
-  flip,
   setFlip,
   isSearchActive,
   setIsSearchActive,

@@ -63,8 +63,8 @@ export const ProfileCards = ({ onSelectGroup }: ProfileCardsProps) => {
         const fetchedGroups = await fetchGroups();
         setGroups(fetchedGroups);
         setFilteredGroups(fetchedGroups);  
-      } catch (error: any) {
-        setError(error.message);
+      } catch (error) {
+        setError('Failed to fetch groups');
       } finally {
         setLoading(false);
       }

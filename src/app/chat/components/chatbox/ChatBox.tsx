@@ -82,7 +82,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ groupId, groupName, onBackClic
     return () => {
       socket.off('receive_message', handleReceiveMessage);
     };
-  }, [groupId, lastPlayedTime]);
+  }, [groupId, lastPlayedTime,authUser.id]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim() === '' || isSending) return;
