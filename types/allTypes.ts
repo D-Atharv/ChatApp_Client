@@ -99,3 +99,21 @@ export interface UpdateModalProps {
     user: User | null;
     onUpdateUser: (name: string, image: File | null, newPassword: string) => void;
 }
+
+  export interface ProfileCardsState {
+  groups: Group[];
+  filteredGroups: Group[];
+  loading: boolean;
+  error: string | null;
+  dropdownOpen: boolean;
+  isUpdateModalOpen: boolean;
+  isAddUserModalOpen: boolean;
+  selectedUser: User | null;
+  flip: boolean;
+  isImageModalOpen: boolean;
+  modalImageUrl: string | null;
+  modalInitials: string;
+  isSearchActive: boolean;
+  searchQuery: string;
+  selectedGroupId: string | null;
+}
