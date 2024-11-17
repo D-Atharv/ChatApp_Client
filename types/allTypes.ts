@@ -117,3 +117,41 @@ export interface UpdateModalProps {
   searchQuery: string;
   selectedGroupId: string | null;
 }
+
+
+
+export interface Group {
+    id: string;
+    isGroupChat: boolean;
+    users: User[];
+  }
+  
+  export interface User {
+    name: string;
+    image: string | null;
+    email: string;
+  }
+  
+  export interface ProfileCardsProps {
+    onSelectGroup: (groupId: string, groupName: string) => void;
+  }
+  
+  export interface DropdownProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onUpdateProfile: (user: User) => void;
+    onAddUser: () => void;
+  }
+  
+  export interface UserAvatarProps {
+    user: User;
+    showStatus?: boolean;
+    onImageClick: (imageUrl: string | null, initials: string) => void;
+  }
+  
+  export interface GroupItemProps {
+    group: Group;
+    isSelected: boolean;
+    onSelect: (group: Group, event: React.MouseEvent) => void;
+    onImageClick: (imageUrl: string | null, initials: string) => void;
+  }
